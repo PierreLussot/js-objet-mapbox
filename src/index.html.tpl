@@ -5,6 +5,10 @@
     <title>Mapbox et Météo</title>
 </head>
 <body>
+<div id="main-map"></div>
+<div class="side-panel">
   <h1>Mapbox et Météo</h1>
+
+</div>
 </body>
 </html>

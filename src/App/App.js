@@ -1,8 +1,16 @@
 import config from '../../app.config';
-import { OpenWeatherService } from "./Service/OpenWeatherService";
-import { LocalStorageService } from "./Service/LocalStorageService";
-import { IconCollection } from "./IconCollection";
-import { WeatherUtils } from "./WeaterUtils";
+
+import 'mapbox-gl/dist/mapbox-gl.css';
+import mapboxgl from 'mapbox-gl';
+
+import '../../assets/css/style.css';
+import '../../assets/css/reset.css';
+
+
+import {OpenWeatherService} from "./Service/OpenWeatherService";
+import {LocalStorageService} from "./Service/LocalStorageService";
+import {IconCollection} from "./IconCollection";
+import {WeatherUtils} from "./WeaterUtils";
 
 const STORAGE_KEY = 'lidem-weather';
 
@@ -17,19 +25,35 @@ class App {
         lon: 0
     };
 
+    mainMap = null;
+
     domCurrentWeather = null;
+
 
     constructor() {
         this.icons = new IconCollection();
-        this.weatherStorage = new LocalStorageService( STORAGE_KEY );
-        this.weatherService = new OpenWeatherService( config.openweather.appid, config.openweather.units, config.openweather.lang );
+        this.weatherStorage = new LocalStorageService(STORAGE_KEY);
+        this.weatherService = new OpenWeatherService(config.openweather.appid, config.openweather.units, config.openweather.lang);
+
+        mapboxgl.accessToken = config.mapbox.token;
     }
 
     /**
      * Démarre l'application
      */
     start() {
-        console.info( 'Starting App...' );
+        console.info('Starting App...');
+
+        this.mainMap = new mapboxgl.Map({
+            container : 'main-map',
+            style: 'mapbox://styles/mapbox/streets-v11',
+            center: [2.8962073723727713, 42.69628128861919],
+            zoom: 9
+            })
+
+        this.mainMap.on('click', (evt) => {
+            console.log(`A click event has occurred at ${evt.lngLat}`);
+        })
     }
 
     /**
@@ -40,13 +64,13 @@ class App {
         let refreshData = storedData === null || storedData.current === undefined;
 
         // Si les data sont bonnes, on effectue la comparaisons des dates
-        if( !refreshData ) {
-            let todayUnix = Math.round( Date.now() / 1000 );
+        if (!refreshData) {
+            let todayUnix = Math.round(Date.now() / 1000);
 
-            refreshData = todayUnix > ( storedData.current.dt + config.openweather.cacheTime );
+            refreshData = todayUnix > (storedData.current.dt + config.openweather.cacheTime);
 
             // Si les data ne sont pas périmées, on effectue la comparaison de la localisation
-            if( !refreshData ) {
+            if (!refreshData) {
                 // Algèbre de Boole
                 // !(A ET B) => !A OU !B
                 refreshData = this.currentGeoLocation.lat !== storedData.lat || this.currentGeoLocation.lon !== storedData.lon;
@@ -54,21 +78,21 @@ class App {
         }
 
         // Si actualisation des données nécéssaire
-        if( refreshData ) {
-            console.info( 'Acquiring data from service...' );
+        if (refreshData) {
+            console.info('Acquiring data from service...');
             this.weatherService
-                .getCurrentConditions( this.currentGeoLocation.lat, this.currentGeoLocation.lon )
-                .then( this.handlerCurrentConditions.bind(this) );
+                .getCurrentConditions(this.currentGeoLocation.lat, this.currentGeoLocation.lon)
+                .then(this.handlerCurrentConditions.bind(this));
 
             return;
         }
 
         // Sinon
-        console.info( 'Acquiring data from cache...' );
-        this.render( storedData );
+        console.info('Acquiring data from cache...');
+        this.render(storedData);
     }
 
-    render( data ) {
+    render(data) {
         const
             current = data.current,
             weather = current.weather[0];
@@ -105,9 +129,9 @@ class App {
      *
      * @param data {Object} Données de météo obtenues
      */
-    handlerCurrentConditions( data ) {
-        this.weatherStorage.setJSON( data );
-        this.render( data );
+    handlerCurrentConditions(data) {
+        this.weatherStorage.setJSON(data);
+        this.render(data);
     }
 
     /**
@@ -115,9 +139,9 @@ class App {
      *
      * @param position {GeolocationPosition} Informations de la géolocalisation obtenue
      */
-    handlerGeoSuccess( position ) {
-        this.currentGeoLocation.lat = parseFloat( position.coords.latitude.toFixed(5).slice(0,-1) );
-        this.currentGeoLocation.lon = parseFloat( position.coords.longitude.toFixed(5).slice(0,-1) );
+    handlerGeoSuccess(position) {
+        this.currentGeoLocation.lat = parseFloat(position.coords.latitude.toFixed(5).slice(0, -1));
+        this.currentGeoLocation.lon = parseFloat(position.coords.longitude.toFixed(5).slice(0, -1));
 
         this.getCurrentConditionsForDefault();
     }
@@ -127,7 +151,7 @@ class App {
      *
      * @param error {GeolocationPositionError} Informations de l'erreur d'obtention de géolocalisation
      */
-    handlerGeoError( error ) {
+    handlerGeoError(error) {
         this.currentGeoLocation.lat = 46.866290;
         this.currentGeoLocation.lon = 2.389138;
 
