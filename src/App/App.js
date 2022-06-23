@@ -11,6 +11,7 @@ import {OpenWeatherService} from "./Service/OpenWeatherService";
 import {LocalStorageService} from "./Service/LocalStorageService";
 import {IconCollection} from "./IconCollection";
 import {WeatherUtils} from "./WeaterUtils";
+import {DummyControl} from "./Mapbox/Control/DummyControl";
 
 const STORAGE_KEY = 'lidem-weather';
 
@@ -45,15 +46,54 @@ class App {
         console.info('Starting App...');
 
         this.mainMap = new mapboxgl.Map({
-            container : 'main-map',
+            container: 'main-map',
             style: 'mapbox://styles/mapbox/streets-v11',
-            center: [2.8962073723727713, 42.69628128861919],
-            zoom: 9
-            })
+            center: [2.7947087584315398, 42.679625849571835],
+            zoom: 10
+        })
 
-        this.mainMap.on('click', (evt) => {
+        this.mainMap.on('click', (evt) => { //.on = addEventListener()
             console.log(`A click event has occurred at ${evt.lngLat}`);
         })
+
+        //Ajout du control de zoom
+        const navControl = new mapboxgl.NavigationControl({
+            visualizePitch: true
+        });
+        this.mainMap.addControl(navControl, 'bottom-right');
+
+        //Ajout controle de geolocalistion
+        const geolocControl = new mapboxgl.GeolocateControl({
+            fitBoundsOptions: {
+                zoom: 15.5
+            },
+            positionOptions: {
+                enableHighAccuracy: false,
+            },
+            //showAccuracyCircle: true,
+            trackUserLocation: true,
+            showUserHeading: true
+        })
+        this.mainMap.addControl(geolocControl, 'top-right');
+
+        //fullscreen
+        const fullScreen = new mapboxgl.FullscreenControl();
+        this.mainMap.addControl(fullScreen, 'top-left');
+
+        //Ajout d'un controle personnalisé "DummyControl"
+        const dummyControl = new DummyControl();
+        this.mainMap.addControl(dummyControl, 'top-right')
+
+        //Marqueur
+
+        const marker = new mapboxgl.Marker({
+            color: "FD0000",
+            anchor: 'bottom',
+            clickTolerance: 10,
+            draggable: true
+        }).setLngLat([2.7947087584315398, 42.679625849571835])
+            .addTo(map);
+        
     }
 
     /**

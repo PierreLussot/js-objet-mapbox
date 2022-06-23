@@ -4,10 +4,19 @@ body{
 }
 
 .side-panel{
-    background-color: #fc0;
+    background-color: #ffea00;
     flex: 0 0 33.333333%;
     padding: 15px;
 }
 #main-map{
     flex-grow: 1;
+}
+h1{
+    color:#ff7b00 ;
+}
+.mapboxgl-ctrl-clown{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 22px;
 }
