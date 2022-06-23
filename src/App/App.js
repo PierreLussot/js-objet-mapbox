@@ -84,16 +84,40 @@ class App {
         const dummyControl = new DummyControl();
         this.mainMap.addControl(dummyControl, 'top-right')
 
-        //Marqueur
+        //Ajout d'un marqueur sans pop up
 
         const marker = new mapboxgl.Marker({
-            color: "FD0000",
-            anchor: 'bottom',
-            clickTolerance: 10,
-            draggable: true
-        }).setLngLat([2.7947087584315398, 42.679625849571835])
-            .addTo(map);
-        
+            color: "#FD0000",
+        });
+
+        marker.setLngLat( {
+            lon: 2.7947087584315398,
+            lat: 42.679625849571835
+        } );
+
+        marker.addTo(this.mainMap);
+
+        // Ajout d'un marker avec popup
+        const markerWPop = new mapboxgl.Marker({
+            color: "#37ff00",
+        });
+
+        markerWPop.setLngLat( {
+            lon: 2.7578682259729987,
+            lat: 42.63232767165178
+
+        } );
+
+        const popup = new mapboxgl.Popup();
+        popup.setHTML('<h2>Coucou popup !</h2><p>Hello there !</p>');
+
+        markerWPop.setPopup( popup );
+        markerWPop.addTo(this.mainMap);
+
+        const markerWPopDiv = markerWPop.getElement();
+        markerWPopDiv.title = 'ici Thuir';
+
+
     }
 
     /**
